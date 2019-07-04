@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(cppbitflag)
 
+include(FetchContent)
 include(GNUInstallDirs)
 
 add_library(cppbitflag INTERFACE)
@@ -23,6 +24,15 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/cppbitflag/
 	    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cppbitflag)
 
 if (EM_CPPBITFLAG_BUILD_TESTS)
+	FetchContent_Declare(Catch
+			GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+			GIT_TAG v2.9.1)
+	FetchContent_GetProperties(Catch)
+	if (NOT Catch_populated)
+		FetchContent_Populate(Catch)
+		add_subdirectory(${catch_SOURCE_DIR} ${catch_BINARY_DIR})
+	endif ()
+
 	add_executable(cppbitflag_tests)
 	set_property(TARGET cppbitflag_tests PROPERTY CXX_STANDARD 17)
 	if (MSVC)
@@ -33,6 +43,7 @@ if (EM_CPPBITFLAG_BUILD_TESTS)
 
 	target_sources(cppbitflag_tests PRIVATE
 		include/bitflag/bitflag.hpp
-		test/bitflag.cpp)
-	target_link_libraries(cppbitflag_tests PRIVATE em::cppbitflag)
+		test/bitflag.cpp
+        test/main.cpp)
+	target_link_libraries(cppbitflag_tests PRIVATE em::cppbitflag Catch2::Catch2)
 endif ()
